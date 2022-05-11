@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express');
 const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo');
 const path = require('path');
 const ejsMate = require('ejs-mate');
 const methodOverride = require('method-override');
@@ -19,8 +20,9 @@ const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
 
 const PORT = process.env.PORT || 8080;
+const mongoUrl = process.env.MONGO_CONNECTION || 'mongodb://localhost:27017/vacation-paradise';
 
-mongoose.connect('mongodb://localhost:27017/yelp-camp', {
+mongoose.connect(mongoUrl, {
 	useNewUrlParser: true,
 	useCreateIndex: true,
 	useUnifiedTopology: true,
@@ -43,7 +45,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const store = MongoStore.create({
+	mongoUrl,
+	touchAfter: 24 * 60 * 60
+});
+
+store.on('error', (e) => console.log(`STORE ERROR: ${e}`));
+
 const sessionConfig = {
+	store,
 	secret: process.env.SESSION_SECRET,
 	resave: false,
 	saveUninitialized: true,
