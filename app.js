@@ -18,6 +18,8 @@ const userRoutes = require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
 
+const PORT = process.env.PORT || 8080;
+
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
 	useNewUrlParser: true,
 	useCreateIndex: true,
@@ -42,7 +44,7 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const sessionConfig = {
-	secret: 'abc123',
+	secret: process.env.SESSION_SECRET,
 	resave: false,
 	saveUninitialized: true,
 	cookie: {
@@ -89,6 +91,6 @@ app.use((err, req, res, next) => {
 	res.status(statusCode).render('error', { err });
 });
 
-app.listen(5000, () => {
-	console.log('Serving on port 5000');
+app.listen(PORT, () => {
+	console.log(`Serving on port ${PORT}`);
 });
